@@ -1,7 +1,7 @@
 from datetime import datetime
 # Импортируется функция для выбора случайного значения:
 from random import randrange
-from flask import Flask
+from flask import Flask, render_template
 # Импортируем класс для работы с ORM:
 from flask_sqlalchemy import SQLAlchemy
 
@@ -33,7 +33,13 @@ def index_view():
     offset_value = randrange(quantity)
     # ...и определяется случайный объект:
     opinion = Opinion.query.offset(offset_value).first()
-    return opinion.text
+    return render_template('opinion.html', opinion=opinion)
+
+@app.route('/add')
+def add_opinion_view():
+    # Тут подключаем шаблон add_opinion.html:
+    return render_template('add_opinion.html')
+
 
 if __name__ == '__main__':
     app.run()
