@@ -1,7 +1,7 @@
 from datetime import datetime
 # Импортируется функция для выбора случайного значения:
 from random import randrange
-from flask import Flask, redirect, render_template, url_for
+from flask import Flask, redirect, render_template, url_for, flash
 # Импортируем класс для работы с ORM:
 from flask_sqlalchemy import SQLAlchemy
 # Новые импорты:
@@ -26,6 +26,7 @@ class Opinion(db.Model):
     text = db.Column(db.Text, unique=True, nullable=False)
     source = db.Column(db.String(256))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
 
 # Класс формы опишите сразу после модели Opinion.
 class OpinionForm(FlaskForm):
@@ -59,16 +60,21 @@ def index_view():
     opinion = Opinion.query.offset(offset_value).first()
     return render_template('opinion.html', opinion=opinion)
 
+
 @app.route('/add', methods=['GET', 'POST'])
 def add_opinion_view():
     form = OpinionForm()
-    # Если ошибок не возникло...
     if form.validate_on_submit():
-        # ...то нужно создать новый экземпляр класса Opinion:
+        text = form.text.data
+        # Если в БД уже есть мнение с текстом, который ввёл пользователь...
+        if Opinion.query.filter_by(text=text).first() is not None:
+            # ...вызвать функцию flash и передать соответствующее сообщение:
+            flash('Такое мнение уже было оставлено ранее!')
+            # Вернуть пользователя на страницу «Добавить новое мнение»:
+            return render_template('add_opinion.html', form=form)
         opinion = Opinion(
-            # И передать в него данные, полученные из формы:
             title=form.title.data,
-            text=form.text.data,
+            text=text,
             source=form.source.data
         )
         # Затем добавить его в сессию работы с базой данных:
