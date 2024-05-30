@@ -9,6 +9,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField, URLField
 from wtforms.validators import DataRequired, Length, Optional
 
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 
@@ -18,7 +19,7 @@ app.config['SECRET_KEY'] = 'FKDLFK34KLEFQ3L3!@2932'
 # Создаём экземпляр SQLAlchemy и в качестве параметра
 # передаём в него экземпляр приложения Flask:
 db = SQLAlchemy(app)
-
+migrate = Migrate(app, db)
 
 class Opinion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
