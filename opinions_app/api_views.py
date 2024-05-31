@@ -1,8 +1,10 @@
+from random import randrange
+
 from flask import jsonify, request
 
 from . import app, db
 from .models import Opinion
-
+from .views import random_opinion
 
 # Явно разрешаем метод GET:
 @app.route('/api/opinions/<int:id>/', methods=['GET'])
@@ -37,3 +39,34 @@ def delete_opinion(id):
     db.session.commit()
     # При удалении принято возвращать только код ответа 204:
     return '', 204
+
+
+@app.route('/api/opinions/', methods=['GET'])
+def get_opinions():
+    # Запрашивается список объектов.
+    opinions = Opinion.query.all()
+    # Поочерёдно сериализуется каждый объект,
+    # а потом все объекты помещаются в список opinions_list.
+    opinions_list = [opinion.to_dict() for opinion in opinions]
+    return jsonify({'opinions': opinions_list}), 200
+
+
+@app.route('/api/opinions/', methods=['POST'])
+def add_opinion():
+    # Получение данных из запроса в виде словаря:
+    data = request.get_json()
+    # Создание нового пустого экземпляра модели:
+    opinion = Opinion()
+    # Наполнение экземпляра данными из запроса:
+    opinion.from_dict(data)
+    # Добавление новой записи в сессию:
+    db.session.add(opinion)
+    # Сохранение изменений:
+    db.session.commit()
+    return jsonify({'opinion': opinion.to_dict()}), 201
+
+
+@app.route('/api/get-random-opinion/', methods=['GET'])
+def get_random_opinion():
+    opinion = random_opinion()
+    return jsonify({'opinion': opinion.to_dict()}), 200
