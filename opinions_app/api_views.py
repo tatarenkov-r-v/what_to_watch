@@ -1,13 +1,12 @@
-from random import randrange
-
+# Импорт исключения.
 from flask import jsonify, request
 
 from . import app, db
+# Импорт исключения.
+from .error_handlers import InvalidAPIUsage
 from .models import Opinion
 from .views import random_opinion
 
-# Импорт исключения.
-from .error_handlers import InvalidAPIUsage
 
 # Явно разрешаем метод GET:
 @app.route('/api/opinions/<int:id>/', methods=['GET'])
